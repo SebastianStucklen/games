@@ -1,0 +1,5 @@
+FOR PLATFORM COLLISION
+
+create list in function that contains all pos values
+return list
+use list as argument for character COLLISION function
