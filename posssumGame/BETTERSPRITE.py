@@ -1,23 +1,22 @@
+#import os
+#os.chdir("posssumGame")
 import pygame
 from pygame.math import Vector2
 from pygame.rect import Rect
 pygame.init() 
 pygame.mixer.init()
-pygame.display.set_caption("platformer")  # sets the window title
+
 screen = pygame.display.set_mode((800, 800))  # creates game screen
-screen.fill((0,0,0))
-clock = pygame.time.Clock() #set up clock
-gameover = False #variable to run our game loop
-global ground
-ground = Vector2(0,700)
+
+
 
 class Possum:
 
 	def __init__(self):
-		self.possum1 = pygame.image.load('possumsprite7.png')
+		self.possum1 = pygame.image.load('resources/possumsprite7.png')
 		self.possum = pygame.transform.smoothscale_by(self.possum1,0.8)
 		 #load your spritesheet
-		self.chirp = pygame.mixer.Sound("chrip.mp3")
+		self.chirp = pygame.mixer.Sound("resources/chrip.mp3")
 
 
 		self.pos = Vector2(0,0)
@@ -39,9 +38,11 @@ class Possum:
 		self.frameWidth = 249*0.8
 		self.frameHeight = 100*0.8
 
-		#self.hitbox = {"top":self.pos.y+15, "left":self.pos.x, "bottom":self.pos.y+self.frameHeight, "right":self.pos.x+self.frameWidth}
-		self.hitbox = Rect(self.pos.x+5, self.pos.y+18, self.frameWidth, self.frameHeight)
+		
+		self.hitbox = Rect(self.pos.x+5, self.pos.y+15, self.frameWidth-5, self.frameHeight-15)
 		# left top width height
+
+		#dumb stuff
 		self.walkFrame = [2,1,0,1]
 		self.sprintFrame = [2,3,3]
 		self.crawlFrame = [0,1]
@@ -89,9 +90,9 @@ class Possum:
 		sprintspeed = 12
 		
 
-
+		# chirp
 		if self.keys[5] == True:
-			if self.chirping == False:
+			if self.chirping == False: # only chirps if not already chirping
 				self.whatdoing = "chirp"
 		elif self.keys[5] == False:
 			if self.isOnGround == True and self.whatdoing != "walk" and self.whatdoing != "land":
@@ -108,12 +109,17 @@ class Possum:
 				self.fastfall = 0
 			if self.isOnGround == False:
 				self.fastfall += 0.1
-
 		elif self.keys[3] == False:
 			if self.isOnGround == True and self.whatdoing != "walk" and self.whatdoing != "land" and self.whatdoing != "chirp":
 				self.whatdoing = "stand"
-				self.charge = 1
-			self.fastfall = 0
+				self.fastfall = 0
+			if self.isOnGround == True:
+				if self.charge > 0:
+					self.charge -= 1.7
+				if self.charge <= 1:
+					self.charge = 1
+			
+			
 
 
 		if self.keys[0]==True:
@@ -173,7 +179,7 @@ class Possum:
 		if self.whatdoing != "chirp":
 			pygame.mixer.Sound.stop(self.chirp)
 
-	def collision(self, objPos:Vector2):
+	def collision(self, objPos:Vector2, groundType:str):
 		if self.hitbox.bottom >= objPos.y:
 			self.isOnGround = True
 		else:
@@ -181,7 +187,6 @@ class Possum:
 
 	def update(self,type):
 		if type == 0:
-			print(self.vel.x)
 			if self.isOnGround == True:
 				if self.vel.y >= 14:
 					self.whatdoing = "land"
@@ -189,6 +194,11 @@ class Possum:
 					self.whatdoing = "sprint"
 				elif self.keys[3] == True:
 					self.whatdoing = "squat"
+				nothingDoing = 0
+				for i in range(len(self.keys)):
+					nothingDoing += 1
+				if nothingDoing == len(self.keys):
+					self.whatdoing = "stand"
 				self.vel.y = 0
 			elif self.isOnGround == False:
 				if self.whatdoing != "chirp":
@@ -200,7 +210,7 @@ class Possum:
 			self.pos.y+=self.vel.y+self.fastfall
 		
 		if type == 3:
-			self.hitbox.topleft = (int(self.pos.x), int(self.pos.y))
+			self.hitbox = Rect(self.pos.x+5, self.pos.y+15, self.frameWidth-5, self.frameHeight-15)
 
 	def actions(self):
 
@@ -263,13 +273,13 @@ class Possum:
 			else:
 				self.RowNum = 0
 			if self.isOnGround == True:
-				#self.pos.y = 499
-				self.vel.y=-(8+(self.charge/10))
+				self.pos.y+=1
+				self.vel.y=-(9+(self.charge/10))
 				self.charge = 1
 
 		if self.whatdoing == "squat":
 			self.hitbox.top = int(self.pos.y+40)
-			
+			self.hitbox.height = int(self.frameHeight-40)
 			if self.keys[4] == True:
 				self.vel.x*=0.985
 			else:
@@ -280,7 +290,8 @@ class Possum:
 				self.RowNum = 3
 
 		if self.whatdoing == "crawl":
-			#self.hitbox.top = int(self.pos.y+40)
+			self.hitbox.top = int(self.pos.y+40)
+			self.hitbox.height = int(self.frameHeight-40)
 			if self.direction == 1:
 				self.RowNum = 4
 			else:
@@ -292,8 +303,7 @@ class Possum:
 					self.frameNum+=1
 			if self.frameNum >= 2:
 				self.frameNum = 0
-		#else:
-			#self.hitbox.top = int(self.pos.y+18)
+		
 
 		if self.whatdoing == "chirp":
 			self.vel.x = 0
@@ -312,54 +322,25 @@ class Possum:
 				pygame.mixer.Sound.stop(self.chirp)
 
 	def draw(self):
-		#print(f"HEIGHT: {self.frameHeight}        WIDTH: {self.frameWidth}")
 		pygame.draw.rect(screen, (50,170,0), self.hitbox)
 		if self.whatdoing == "jump" or self.whatdoing == "leap":
-			screen.blit(self.possum, (self.pos.x, self.pos.y), (self.frameWidth*3, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
+			screen.blit(self.possum, self.pos, (self.frameWidth*3, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		elif self.whatdoing == "stand":
-			screen.blit(self.possum, (self.pos.x, self.pos.y), (self.frameWidth*self.standFrame[self.frameNum], self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
+			screen.blit(self.possum, self.pos, (self.frameWidth*self.standFrame[self.frameNum], self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		elif self.whatdoing == "walk":
-			screen.blit(self.possum, (self.pos.x, self.pos.y), (self.frameWidth*self.walkFrame[self.frameNum], self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
+			screen.blit(self.possum, self.pos, (self.frameWidth*self.walkFrame[self.frameNum], self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		elif self.whatdoing == "sprint":
-			screen.blit(self.possum, (self.pos.x, self.pos.y), (self.frameWidth*self.sprintFrame[self.frameNum], self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
+			screen.blit(self.possum, self.pos, (self.frameWidth*self.sprintFrame[self.frameNum], self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		elif self.whatdoing == "land":
-			screen.blit(self.possum, (self.pos.x, self.pos.y), (self.frameWidth*self.direction, 2*self.frameHeight, self.frameWidth, self.frameHeight))
+			screen.blit(self.possum, self.pos, (self.frameWidth*self.direction, 2*self.frameHeight, self.frameWidth, self.frameHeight))
 		elif self.whatdoing == "crawl":
-			screen.blit(self.possum, (self.pos.x, self.pos.y), (self.frameWidth*self.crawlFrame[self.frameNum], self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
+			screen.blit(self.possum, self.pos, (self.frameWidth*self.crawlFrame[self.frameNum], self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		elif self.whatdoing == "squat":
-			screen.blit(self.possum, (self.pos.x, self.pos.y), (self.frameWidth, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
+			screen.blit(self.possum, self.pos, (self.frameWidth, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		elif self.whatdoing == "chirp":
-			screen.blit(self.possum, (self.pos.x, self.pos.y), (2*self.frameWidth, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
+			screen.blit(self.possum, self.pos, (2*self.frameWidth, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		else:
 			self.whatdoing = "walk"
-
-		
-character = Possum()
-
-while not gameover:
-
-	clock.tick(60)
-
-	character.update(3)
-
-	character.collision(ground)
-
-	character.update(0)
-
-	character.getKeyPressed()
-
-	character.playerInput()
-
-	character.actions()
-
-	character.update(1)
-	
-
-	screen.fill((200,210,200))
-	character.draw()
-	pygame.draw.line(screen, (180,190,180),(0,ground.y),(800,ground.y),1)
-	pygame.display.flip()
-
-pygame.quit()
+		pygame.draw.line(screen, (180,190,0),(400-self.charge*0.7,780),(400+self.charge*0.7,780),20)
 
 	
