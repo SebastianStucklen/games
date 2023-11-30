@@ -13,10 +13,15 @@ class enemy():
         self.alive = True
         self.pos = pygame.Rect(xpos, ypos, 128, 128)
         self.vel = Vector2(0,0)
+        self.health = 0
 
-        
+    def update(self, playerdam):
+        self.pos.left += int(self.vel.x)
+        self.pos.top += int(self.vel.y)
+        self.health -= playerdam
 
-
+    def collide(self):
+        pass
 
 class Dog(enemy):
     def __init__(self, xpos, ypos):
@@ -31,18 +36,6 @@ class Dog(enemy):
         if self.alive == True:
             screen.blit(self.dog, self.pos)
 
-
-    def update(self, playerdam):
-        self.pos.left += int(self.vel.x)
-        self.pos.top += int(self.vel.y)
-        self.health -= playerdam
-
-    def collision(self):
-        pass
-
-
-
-
 class Horse(enemy):
     def __init__(self, xpos, ypos):
         self.health = 10000
@@ -51,17 +44,8 @@ class Horse(enemy):
         self.horse = pygame.image.load('resources/horse.png')
         self.horse2 = pygame.transform.smoothscale(self.horse,(250,250))
     def draw(self):
-        pass
         if self.alive == True:
             screen.blit(self.horse, self.pos)
-
-    def update(self, playerdam):
-        self.pos.left += int(self.vel.x)
-        self.pos.top += int(self.vel.y)
-        self.health -= playerdam
-
-    def collide(self):
-        pass
 
 class Fox(enemy):
     def __init__(self, xpos, ypos):
@@ -70,14 +54,17 @@ class Fox(enemy):
         super().__init__(xpos, ypos)
         self.fox = pygame.image.load('resources/fox.png')
     def draw(self):
-        pass
         if self.alive == True:
             screen.blit(self.fox, self.pos)
 
-    def update(self, playerdam):
-        self.pos.left += int(self.vel.x)
-        self.pos.top += int(self.vel.y)
-        self.health -= playerdam
+class Eagle(enemy):
+    def __init__(self, xpos, ypos):
+        self.health = 100
+        self.dfsdffsdsfdsdfsfdsfdsdffsdsdfsfdsdfsfdfsdsfd = 1
+        self.fox = pygame.image.load('resources/fox.png')
+        super().__init__(xpos, ypos)
 
-    def collide(self):
-        pass
+    def draw(self):
+        if self.alive == True:
+            screen.blit(self.fox, self.pos)
+    

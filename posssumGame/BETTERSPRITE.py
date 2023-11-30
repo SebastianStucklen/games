@@ -23,7 +23,7 @@ class Possum:
 		self.frameHeight = 100*0.6
 
 		#Pos and Vel
-		self.pos = Vector2(0,300)
+		self.pos = Vector2(330,300)
 		self.isOnGround = False
 		self.vel = Vector2(0,0)
 		self.offset = 0
@@ -36,9 +36,12 @@ class Possum:
 		self.charge = 0
 		self.fastfall = 0
 
+		#collison
 		self.groundType = "normal"
 		self.objPos = Rect(0,0,0,0)
+		self.platList = []
 
+		#anim
 		self.landTick = 0
 		self.ticker = 0
 		
@@ -60,7 +63,7 @@ class Possum:
 		keys = pygame.key.get_pressed()
 		walkspeed = 3.5
 		sprintspeed = 12
-
+	#------------------------------------------------------------------------------------------------
 		if keys[pygame.K_DOWN]:# or keys[pygame.K_z]:
 			self.pressed[3] = True
 			if self.isOnGround == True:
@@ -79,13 +82,14 @@ class Possum:
 					self.charge -= 1.7
 				if self.charge <= 1:
 					self.charge = 1
-
+	#------------------------------------------------------------------------------------------------
 		if keys[pygame.K_LEFT]:
 			self.pressed[0]=True
 			if self.whatdoing != "squat" and self.isOnGround == True:
 				self.whatdoing = "walk"
 			elif self.whatdoing == "squat":
 				self.whatdoing = "crawl"
+
 			if keys[pygame.K_LSHIFT]:
 				if self.whatdoing != "jump":
 					self.whatdoing = "sprint"
@@ -101,7 +105,7 @@ class Possum:
 			self.direction = 1
 		else:
 			self.pressed[0]=False
-
+	#------------------------------------------------------------------------------------------------
 		if keys[pygame.K_RIGHT]:
 			self.pressed[1]=True
 			if self.whatdoing != "squat" and self.isOnGround == True:
@@ -125,16 +129,17 @@ class Possum:
 				else:
 					self.vel.x= walkspeed
 			self.direction = 0
+
 		else:
 			self.pressed[1]=False
-		
+	#------------------------------------------------------------------------------------------------
 		if keys[pygame.K_LEFT] == False and keys[pygame.K_RIGHT] == False:
 			if self.isOnGround == False:
 				if abs(self.vel.x) != 0:
 					self.vel.x*=0.98
 				if abs(self.vel.x)<=0.2:
 					self.vel.x = 0
-
+	#------------------------------------------------------------------------------------------------
 		if keys[pygame.K_UP]:# or keys[pygame.K_x]:
 			self.pressed[2]=True
 			self.whatdoing = "jump"
@@ -142,16 +147,12 @@ class Possum:
 				self.hitbox.bottom+=1
 		else:
 			self.pressed[2]=False
-
+	#------------------------------------------------------------------------------------------------
 		if keys[pygame.K_LSHIFT]:
 			self.pressed[4] = True
 		else:
 			self.pressed[4] = False
 
-		if keys[pygame.K_v]:
-			self.pressed[5] = True
-		else:
-			self.pressed[5]=False
 			
 	def ybuydauyed(self):
 		#def playerInput(self):
@@ -246,86 +247,73 @@ class Possum:
 			##if self.whatdoing != "chirp":
 			##	pygame.mixer.Sound.stop(self.chirp)
 		pass
+	def getPlatty(self,num:int):
+		for i in range(num):
+			self.platList.append(False)
 
-	def collision(self, objPos:Rect, groundType:str):
+
+	def collision(self, objPos:Rect, groundType:str,num:int):
 
 		if self.hitbox.colliderect(objPos):
-			self.groundType = groundType
-			self.objPos.update(objPos.left, objPos.top, objPos.width, objPos.height)
-			self.isOnGround = True
-
-			print('a')
-			self.hitbox.top = self.objPos.top-self.hitbox.height
-			if self.vel.y >= 14:
-				self.whatdoing = "land"
-			elif self.whatdoing != "land":
-				self.whatdoing = "stand"
-				#nothingDoing = 0
-				#for i in range(len(self.pressed)):
-				#	nothingDoing += 1
-				#if nothingDoing == len(self.pressed):
-				#	self.whatdoing = "stand"
-			self.vel.y = 0
-			self.fastfall = 0
-		else:
-			self.groundType = "air"
-			self.isOnGround = False
+			if self.hitbox.top >= objPos.bottom:
+				self.vel.y = 0.1
+			elif self.hitbox.bottom >= objPos.top:
+				self.groundType = groundType
+				self.objPos.update(objPos.left, objPos.top, objPos.width, objPos.height)
+				self.platList[num] = True
 			
+		else:
+			self.platList[num] = False
 
-
-		#if self.hitbox.bottom >= objPos.top and self.hitbox.centery <= objPos.centery:
-		#	if self.hitbox.right > objPos.left and self.hitbox.left < objPos.right:
-		#		self.groundType = groundType
-		#		self.objPos = objPos
-		#		self.isOnGround = True
-		#
-		#if :
-		#	if self.hitbox.right < objPos.left and self.hitbox.left > objPos.right:
-		#	#self.objPos.update(-500, 700, 10000, 10000)
-		#		self.groundType = "normal"
-		#		self.isOnGround = False
-		
 		#if self.groundType == "normal":
 		#	pass
-		if self.groundType == "Ice":
-			pass
-		elif self.groundType == "trampoline":
-			self.vel.y -= 10
-		elif self.groundType == "Moveblock":
-			pass
-		elif self.groundType == "breakblock":
-			pass
+		#if self.groundType == "Ice":
+		#	pass
+		#elif self.groundType == "trampoline":
+		#	self.vel.y -= 10
+		#elif self.groundType == "Moveblock":
+		#	pass
+		#elif self.groundType == "breakblock":
+		#	pass
 
 	
 	def update(self,type):
-		if type == 0:	
-			#if self.isOnGround == True:
-			#	print('a')
-			#	self.hitbox.bottom = self.objPos.top
-#
-			#	if self.vel.y >= 14:
-			#		self.whatdoing = "land"
-			#	elif self.whatdoing != "land":
-			#		nothingDoing = 0
-			#		for i in range(len(self.pressed)):
-			#			nothingDoing += 1
-			#		if nothingDoing == len(self.pressed):
-			#			self.whatdoing = "stand"
-			#	self.vel.y = 0
-			#	self.fastfall = 0
+		groundNum = 0
+		if type == 0:
+			for i in range(len(self.platList)):
+				if self.platList[i] == True:
+						groundNum += 1
+				if groundNum > 0:
+					self.isOnGround = True
+				else:
+					self.isOnGround = False
+			if self.isOnGround == True:
+				print('a')
+				self.hitbox.bottom = self.objPos.top
 
-			if self.groundType == "air":
-				#if self.whatdoing != "chirp":
+				if self.vel.y >= 14:
+					self.whatdoing = "land"
+				elif self.whatdoing != "land":
+					nothingDoing = 0
+					for i in range(len(self.pressed)):
+						nothingDoing += 1
+					if nothingDoing == len(self.pressed):
+						self.whatdoing = "stand"
+				self.vel.y = 0
+				self.fastfall = 0
+
+			if self.isOnGround == False:
 				self.whatdoing = "jump"
 				self.vel.y += 0.4
 		if type == 1:
 			#self.hitbox.left+=int(self.vel.x) 
 			#self.hitbox.bottom+=int(self.vel.y+self.fastfall)
-			self.pos.x += self.vel.x
+			#self.pos.x += self.vel.x
 			self.pos.y += self.vel.y+self.fastfall
+			self.offset-=self.vel.x
+			
 		
 		if type == 3:
-
 			self.hitbox.update(self.pos.x+5, self.pos.y+15, self.frameWidth-5, self.frameHeight-15)
 
 		

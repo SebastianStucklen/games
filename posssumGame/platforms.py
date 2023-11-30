@@ -9,11 +9,12 @@ screen = pygame.display.set_mode((800, 800))  # creates game screen
 global plat
 plat = 0
 
-class platform():
+class Platform():
     def __init__(self, xpos, ypos):
         self.hitbox = Rect(xpos, ypos, 0, 0)
         self.type = "normal"
         self.velChange = Vector2 (10,0)
+        self.flooroffset = 0
     def draw(self):
         pygame.draw.rect(screen, (100, 50, 100), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
     
@@ -22,18 +23,21 @@ class platform():
     def returnType(self):
         return self.type
     
-    def returnPos(self):
-        return self.hitbox
+    def updatePos(self,x,y):
+        self.hitbox.update(x,y,self.hitbox.width,self.hitbox.height)
 
-class floor(platform):
+class Floor(Platform):
     def __init__(self, xpos, ypos):
-        self.hitbox = Rect(xpos, ypos, 10000, 10000)
+        self.hitbox = Rect(xpos, ypos, 50, 50)
         self.type = "normal"
+        self.dirt = pygame.image.load('resources/grass.jpg')
+        self.dirt2 = pygame.transform.smoothscale(self.dirt,(50,50))
     def draw(self):
-        pygame.draw.rect(screen, (180,190,180), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
+        #pygame.draw.rect(screen, (180,190,180), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
+        screen.blit(self.dirt2, self.hitbox)
 
 
-class mblock(platform):
+class Mblock(Platform):
     def __init__(self, xpos, ypos):
         self.hitbox = Rect(xpos, ypos, 100, 30)
         self.startx = xpos
@@ -44,15 +48,17 @@ class mblock(platform):
         pygame.draw.rect(screen, (255, 0, 0), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
 
 
-class trampoline(platform):
+class Trampoline(Platform):
     def __init__(self, xpos, ypos):
         self.hitbox = Rect(xpos, ypos, 100, 30)
         self.type = "trampoline"
         self.velChange = Vector2 (0,10)
+        
+        
     def draw(self):
         pygame.draw.rect(screen, (255, 255, 255), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
         
-class ice_block(platform):
+class Ice_block(Platform):
     def __init__(self, xpos, ypos):
         self.hitbox = Rect(xpos, ypos, 100, 100)
         self.type = "Ice"
