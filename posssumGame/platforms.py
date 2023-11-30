@@ -32,7 +32,10 @@ class Floor(Platform):
         self.type = "normal"
         self.dirt = pygame.image.load('resources/grass.jpg')
         self.dirt2 = pygame.transform.smoothscale(self.dirt,(50,50))
+        self.floors = []
+    
     def draw(self):
+        
         #pygame.draw.rect(screen, (180,190,180), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
         screen.blit(self.dirt2, self.hitbox)
 

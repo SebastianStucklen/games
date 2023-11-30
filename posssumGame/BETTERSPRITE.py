@@ -288,7 +288,7 @@ class Possum:
 				else:
 					self.isOnGround = False
 			if self.isOnGround == True:
-				print('a')
+
 				self.hitbox.bottom = self.objPos.top
 
 				if self.vel.y >= 14:

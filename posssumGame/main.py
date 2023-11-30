@@ -31,15 +31,49 @@ screen.fill((0,0,0))
 clock = pygame.time.Clock() #set up clock
 gameover = False #variable to run our game loop
 
-#MAP: 1 is grass
-map = levels.maps.room_one
+#map1: 1 is grass
+map1 = levels.maps.room_one
 
-#tramp = Trampoline(100, 100)
+tramp = Trampoline(100, 100)
 
 character = Possum()
 
-plats = []
+plats1 = [[],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   [],
+	   []]
+class dumb:
+	def __init__(self):
+		self.hitbox = Rect(0, 0, 0, 0)
+		self.type = "normal"
+		self.velChange = Vector2 (10,0)
+		self.flooroffset = 0
+	def draw(self):
+		pygame.draw.rect(screen, (100, 50, 100), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
+	
+	def move(self):
+		pass
+	def returnType(self):
+		return self.type
+	
+	def updatePos(self,x,y):
+		self.hitbox.update(x,y,self.hitbox.width,self.hitbox.height)
 
+
+platNum = 0
+whatPlat = 0
 #floor = Floor(100,800)
 
 
@@ -53,19 +87,22 @@ plats = []
 
 for i in range (16):
 		for j in range(42):
-			if map[i][j]==1:
-				plats.append(Floor(j*50, i*50))
-				
+			if map1[i][j]!=0:
+				plats1[i].append(Floor(i*50,j*50))
+				#map(lambda x:Floor(i*50,j*50) if x== 0 else x,plats)
+			else:
+				plats1[i].append(0)
+			if map1[i][j] != 0:
+				platNum +=1
 
-
-character.getPlatty(len(plats))
+character.getPlatty(platNum)
 
 
 #eagle = Eagle(100,100)
 dog = Dog(100, 100)
 horse = Horse(0,0) 
 fox = Fox(0, 0)
-global plat
+
 
 #PLACE HOLDER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -84,10 +121,12 @@ while not gameover:
 	keys = pygame.key.get_pressed()
 
 	character.update(3) #update hitbox
-	
-	for i in range(len(plats)):
-		character.collision(plats[i].hitbox, plats[i].type,i)
-	
+	for i in range (16):
+		for j in range(42):
+			if map1[i][j]!=0:
+				character.collision(plats1[i][j].hitbox, plats1[i][j].type,whatPlat)
+				whatPlat+=1
+	whatPlat = 0
 
 	character.update(0) #ground, gravity, etc
 	
@@ -107,25 +146,23 @@ while not gameover:
 	#fox.draw()
 	#Trampoline.draw()
 
-	for i in range(len(plats)):
-		plats[i].draw()
 	
 	#for i in range(len(plats)):
 	#	plats[i].returnType()
-	
 	
 
 	#pygame.draw.line(screen, (180,190,180),(0,ground.y),(800,ground.y),1)
 	for i in range (16):
 		for j in range(42):
-			if map[i][j]==1:
-				screen.blit(plats[i].dirt2, (j*50+character.offset, i*50), (0, 0, 50, 50))
-				plats[i].updatePos(j*50+character.offset, i*50)
+			if map1[i][j]!=0:
+				plats1[i][j].updatePos(j*50+character.offset, i*50)
+				plats1[i][j].draw()
+
 
 	#for i in range (16):
 	#	for j in range(42):
-	#		if map[i][j]==2:
-	#			screen.blit(plats[i].trampolineplat, (j*50+character.offset, i*50), (0, 0, 50, 50))
+	#		if map1[i][j]==2:
+	#			screen.blit(plats[i].Trampoline, (j*50+character.offset, i*50), (0, 0, 50, 50))
 	character.draw()#drawing
 	pygame.display.flip()
 
