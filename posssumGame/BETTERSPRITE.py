@@ -6,27 +6,28 @@ from pygame.rect import Rect
 pygame.init() 
 pygame.mixer.init()
 
-screen = pygame.display.set_mode((800, 800))  # creates game screen
+screen = pygame.display.set_mode((1600, 800))  # creates game screen
 
 
 
 class Possum:
 
 	def __init__(self):
-
+		self.size = 0.5
 		self.damage = 100
 		self.possum1 = pygame.image.load('resources/possumsprite7.png')
-		self.possum = pygame.transform.smoothscale_by(self.possum1,0.6)
+		self.possum = pygame.transform.smoothscale_by(self.possum1,self.size)
 		 #load your spritesheet
 		#self.chirp = pygame.mixer.Sound("resources/chrip.mp3")
-		self.frameWidth = 249*0.6
-		self.frameHeight = 100*0.6
+		self.frameWidth = 249*self.size
+		self.frameHeight = 100*self.size
 
 		#Pos and Vel
-		self.pos = Vector2(330,300)
+		self.pos = Vector2(800,400)
 		self.isOnGround = False
+		self.isOnWall = False
 		self.vel = Vector2(0,0)
-		self.offset = 0
+		self.offset = Vector2(0,0)
 
 		#action
 		self.pressed = [False, False, False, False, False, False]
@@ -38,8 +39,10 @@ class Possum:
 
 		#collison
 		self.groundType = "normal"
-		self.objPos = Rect(0,0,0,0)
+		self.groundPos = Rect(0,0,0,0)
+		self.wallPos = Rect(0,0,0,0)
 		self.platList = []
+		self.wallList = []
 
 		#anim
 		self.landTick = 0
@@ -61,8 +64,8 @@ class Possum:
 
 	def getKeyPressed(self):
 		keys = pygame.key.get_pressed()
-		walkspeed = 3.5
-		sprintspeed = 12
+		walkspeed = 3.5 * self.size*1.5
+		sprintspeed = 12 * self.size*1.5
 	#------------------------------------------------------------------------------------------------
 		if keys[pygame.K_DOWN]:# or keys[pygame.K_z]:
 			self.pressed[3] = True
@@ -89,19 +92,19 @@ class Possum:
 				self.whatdoing = "walk"
 			elif self.whatdoing == "squat":
 				self.whatdoing = "crawl"
-
-			if keys[pygame.K_LSHIFT]:
-				if self.whatdoing != "jump":
-					self.whatdoing = "sprint"
-				if self.vel.x > -sprintspeed:
-					self.vel.x-=0.6
+			if self.isOnWall != True:
+				if keys[pygame.K_LSHIFT]:
+					if self.whatdoing != "jump":
+						self.whatdoing = "sprint"
+					if self.vel.x > -sprintspeed:
+						self.vel.x-=0.6
+					else:
+						self.vel.x = -sprintspeed
 				else:
-					self.vel.x = -sprintspeed
-			else:
-				if self.vel.x < -walkspeed:
-					self.vel.x += 0.5
-				else:
-					self.vel.x= -walkspeed
+					if self.vel.x < -walkspeed:
+						self.vel.x += 0.5
+					else:
+						self.vel.x= -walkspeed
 			self.direction = 1
 		else:
 			self.pressed[0]=False
@@ -112,22 +115,22 @@ class Possum:
 				self.whatdoing = "walk"
 			elif self.whatdoing == "squat":
 				self.whatdoing = "crawl"
-
-			if keys[pygame.K_LSHIFT]:
-				if self.whatdoing != "jump":
-					if self.whatdoing == "squat":
-						self.whatdoing = "crawl"
+			if self.isOnWall != True:
+				if keys[pygame.K_LSHIFT]:
+					if self.whatdoing != "jump":
+						if self.whatdoing == "squat":
+							self.whatdoing = "crawl"
+						else:
+							self.whatdoing = "sprint"
+					if self.vel.x < sprintspeed:
+						self.vel.x+=0.6
 					else:
-						self.whatdoing = "sprint"
-				if self.vel.x < sprintspeed:
-					self.vel.x+=0.6
+						self.vel.x = sprintspeed
 				else:
-					self.vel.x = sprintspeed
-			else:
-				if self.vel.x > walkspeed:
-					self.vel.x -= 0.5
-				else:
-					self.vel.x= walkspeed
+					if self.vel.x > walkspeed:
+						self.vel.x -= 0.5
+					else:
+						self.vel.x= walkspeed
 			self.direction = 0
 
 		else:
@@ -153,117 +156,42 @@ class Possum:
 		else:
 			self.pressed[4] = False
 
-			
-	def ybuydauyed(self):
-		#def playerInput(self):
-			#walkspeed = 3.5
-			#sprintspeed = 12
 
-
-			# chirp
-			#if keys[5] == True:
-			#	if self.chirping == False: # only chirps if not already chirping
-			#		self.whatdoing = "chirp"
-			#elif keys[5] == False:
-			#	#if self.isOnGround == True and self.whatdoing != "walk" and self.whatdoing != "land":
-			#	#	self.whatdoing = "stand"
-			#	self.chirping = False
-			#	pygame.mixer.Sound.stop(self.chirp)
-
-			#if self.pressed[3] == True:
-			#	if self.isOnGround == True:
-			#		self.whatdoing = "squat"
-			#		self.charge += 1.4
-			#		if self.charge >= 100:
-			#			self.charge = 100
-			#		self.fastfall = 0
-			#	if self.isOnGround == False:
-			#		self.fastfall += 0.1
-			#elif self.pressed[3] == False:
-			#	self.fastfall = 0
-			#	if self.isOnGround == True:
-			#		if self.charge > 0:
-			#			self.charge -= 1.7
-			#		if self.charge <= 1:
-			#			self.charge = 1
-
-
-
-
-			#if self.pressed[0]==True:
-			#	if self.whatdoing != "squat" and self.isOnGround == True:
-			#		self.whatdoing = "walk"
-			#	elif self.whatdoing == "squat":
-			#		self.whatdoing = "crawl"
-			#	if self.pressed[4] == True:
-			#		if self.whatdoing != "jump":
-			#			self.whatdoing = "sprint"
-			#		if self.vel.x > -sprintspeed:
-			#			self.vel.x-=0.6
-			#		else:
-			#			self.vel.x = -sprintspeed
-			#	else:
-			#		if self.vel.x < -walkspeed:
-			#			self.vel.x += 0.5
-			#		else:
-			#			self.vel.x= -walkspeed
-			#	self.direction = 1
-#	
-			#elif self.pressed[1] == True:
-			#	if self.whatdoing != "squat" and self.isOnGround == True:
-			#		self.whatdoing = "walk"
-			#	elif self.whatdoing == "squat":
-			#		self.whatdoing = "crawl"
-#	
-			#	if self.pressed[4] == True:
-			#		if self.whatdoing != "jump":
-			#			if self.whatdoing == "squat":
-			#				self.whatdoing = "crawl"
-			#			else:
-			#				self.whatdoing = "sprint"
-			#		if self.vel.x < sprintspeed:
-			#			self.vel.x+=0.6
-			#		else:
-			#			self.vel.x = sprintspeed
-			#	else:
-			#		if self.vel.x > walkspeed:
-			#			self.vel.x -= 0.5
-			#		else:
-			#			self.vel.x= walkspeed
-			#	self.direction = 0
-
-
-			#else:
-			#	#if self.whatdoing != "land" and self.whatdoing != "squat" and self.isOnGround == True and self.whatdoing!= "chirp":
-			#	#	self.whatdoing = "stand"
-			#	if self.isOnGround == False:
-			#		if abs(self.vel.x) != 0:
-			#			self.vel.x*=0.98
-			#		if abs(self.vel.x)<=0.2:
-			#			self.vel.x = 0
-
-			#if self.pressed[2] == True:
-			#	self.whatdoing = "jump"
-			##if self.whatdoing != "chirp":
-			##	pygame.mixer.Sound.stop(self.chirp)
-		pass
 	def getPlatty(self,num:int):
 		for i in range(num):
 			self.platList.append(False)
+			self.wallList.append(False)
 
 
 	def collision(self, objPos:Rect, groundType:str,num:int):
 
-		if self.hitbox.colliderect(objPos):
-			if self.hitbox.top >= objPos.bottom:
-				self.vel.y = 0.1
-			elif self.hitbox.bottom >= objPos.top:
-				self.groundType = groundType
-				self.objPos.update(objPos.left, objPos.top, objPos.width, objPos.height)
-				self.platList[num] = True
+		#if self.hitbox.colliderect(objPos):
+				#if self.vel.x > 0:
+				#	#if self.hitbox.right >= objPos.left and self.hitbox.centery+10 > objPos.top and self.hitbox.centery-10 < objPos.#bottom:
+				#	self.vel.x = 0
+				#	#self.pos.x=objPos.left+self.frameWidth
+				#	print("right")
+				#if self.vel.x < 0:
+				#	#if self.hitbox.left <= objPos.right and self.hitbox.centery+10 > objPos.top and self.hitbox.bottom-10 < objPos.#bottom:
+				#	self.vel.x = 0
+				#	#self.pos.x=objPos.right
+				#	print("left")
+		if self.hitbox.colliderect(objPos) == True:
+			self.groundPos = objPos
+			self.groundType = groundType
+			if self.hitbox.bottom >= self.groundPos.top-self.vel.y and self.hitbox.top < self.groundPos.top:
+				if self.hitbox.centerx+self.hitbox.width*0.3> self.groundPos.left and self.hitbox.centerx-self.hitbox.width*0.3 < self.groundPos.right:
+					self.platList[num] = True
+			elif self.hitbox.right >= objPos.left and self.hitbox.centery+10 > objPos.top:
+				self.wallPos.update(objPos)
+				self.wallList[num] = True
+			elif self.hitbox.left <= objPos.right and self.hitbox.centery+10 > objPos.top:
+				self.wallPos.update(objPos)
+				self.wallList[num] = True 
 			
 		else:
 			self.platList[num] = False
+			self.wallList[num] = False
 
 		#if self.groundType == "normal":
 		#	pass
@@ -279,6 +207,7 @@ class Possum:
 	
 	def update(self,type):
 		groundNum = 0
+		wallNum = 0
 		if type == 0:
 			for i in range(len(self.platList)):
 				if self.platList[i] == True:
@@ -287,9 +216,25 @@ class Possum:
 					self.isOnGround = True
 				else:
 					self.isOnGround = False
-			if self.isOnGround == True:
+			for i in range(len(self.wallList)):
+				if self.wallList[i] == True:
+					wallNum += 1
+				if wallNum > 0:
+					self.isOnWall = True
+				else:
+					self.isOnWall = False
+			if self.isOnWall == True:
 
-				self.hitbox.bottom = self.objPos.top
+				if self.hitbox.right>self.wallPos.left and self.vel.x>0:
+					self.vel.x = 0
+					self.offset.x += (self.hitbox.right - self.wallPos.left) 
+				if self.hitbox.left<self.wallPos.right and self.vel.x<0:
+					self.vel.x = 0
+					self.offset.x -= (self.wallPos.right - self.hitbox.left) 
+
+			if self.isOnGround == True:
+				if self.hitbox.bottom>self.groundPos.top and self.isOnWall != True:
+					self.offset.y += self.hitbox.bottom - self.groundPos.top - 1
 
 				if self.vel.y >= 14:
 					self.whatdoing = "land"
@@ -309,8 +254,9 @@ class Possum:
 			#self.hitbox.left+=int(self.vel.x) 
 			#self.hitbox.bottom+=int(self.vel.y+self.fastfall)
 			#self.pos.x += self.vel.x
-			self.pos.y += self.vel.y+self.fastfall
-			self.offset-=self.vel.x
+			self.offset.y -= self.vel.y + self.fastfall
+			#self.pos.x += (self.vel.x)*0.5
+			self.offset.x -= self.vel.x
 			
 		
 		if type == 3:
@@ -321,6 +267,7 @@ class Possum:
 	def actions(self):
 
 		if self.whatdoing == "land":
+			self.hitbox.update(self.pos.x+5, self.pos.y+30,self.hitbox.width,self.hitbox.height-15)
 			self.landTick += 1
 			self.vel.x*=0.96
 			if self.landTick == 60:
@@ -377,7 +324,7 @@ class Possum:
 				self.RowNum = 1
 			else:
 				self.RowNum = 0
-			if self.isOnGround == True:
+			if self.isOnGround == True and self.isOnWall != True:
 				self.vel.y=-(9+(self.charge/10))
 				self.charge = 1
 
@@ -407,7 +354,6 @@ class Possum:
 			if self.frameNum >= 2:
 				self.frameNum = 0
 		
-
 		#if self.whatdoing == "chirp":
 		#	self.vel.x = 0
 		#	if self.direction == 1:
@@ -447,7 +393,7 @@ class Possum:
 		#	screen.blit(self.possum, self.pos, (2*self.frameWidth, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		else:
 			self.whatdoing = "walk"
-		pygame.draw.line(screen, (180,190,0),(400-self.charge*0.7,780),(400+self.charge*0.7,780),20)
+		pygame.draw.line(screen, (180,190,0),(800-self.charge*1.2,780),(800+self.charge*1.2,780),20)
 	def damagefun(self):
 		return self.damage
 

@@ -4,12 +4,17 @@ import math
 from pygame.math import Vector2
 from pygame.rect import Rect
 
-screen = pygame.display.set_mode((800, 800))  # creates game screen
+screen = pygame.display.set_mode((1600, 800))  # creates game screen
+
+_floorsprite = pygame.image.load('resources/grass.jpg')
+_floorsprite = pygame.transform.smoothscale(_floorsprite,(50,50))
 
 global plat
 plat = 0
 
 class Platform():
+    image: pygame.Surface
+
     def __init__(self, xpos, ypos):
         self.hitbox = Rect(xpos, ypos, 0, 0)
         self.type = "normal"
@@ -27,17 +32,17 @@ class Platform():
         self.hitbox.update(x,y,self.hitbox.width,self.hitbox.height)
 
 class Floor(Platform):
+    image = _floorsprite
+
     def __init__(self, xpos, ypos):
         self.hitbox = Rect(xpos, ypos, 50, 50)
         self.type = "normal"
-        self.dirt = pygame.image.load('resources/grass.jpg')
-        self.dirt2 = pygame.transform.smoothscale(self.dirt,(50,50))
         self.floors = []
     
     def draw(self):
         
         #pygame.draw.rect(screen, (180,190,180), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
-        screen.blit(self.dirt2, self.hitbox)
+        screen.blit(self.image, self.hitbox)
 
 
 class Mblock(Platform):
@@ -68,4 +73,15 @@ class Ice_block(Platform):
         self.velChange = Vector2 (10,0)
     def draw(self):
         pygame.draw.rect(screen, (0, 0, 105), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
+
+#Walls
+class map_bound_walls(Platform):
+    def __init__(self, xpos, ypos):
+        self.hitbox = Rect(xpos, ypos, 30, 100)
+        self.type = "normal"
+    def draw(self):
+        pygame.draw.rect(screen, (90, 50, 20), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
+        
+    def returnType(self):
+        return self.type
     
