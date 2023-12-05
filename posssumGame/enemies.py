@@ -81,7 +81,7 @@ class Dog(enemy):
 	
 	def draw(self):
 		if self.alive == True:
-			screen.blit(self.dog, self.hitbox,(self.pos.x + self.offset.x, self.pos.y + self.offset.y))
+			screen.blit(self.dog, self.hitbox)
 
 	def movement(self):
 		if self.alive == True:

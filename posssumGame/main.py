@@ -8,13 +8,15 @@ from platforms import Trampoline
 from platforms import Mblock
 from platforms import Ice_block
 from platforms import Floor
+from platforms import spawn
 
 from enemies import Dog
 from enemies import Horse
 from enemies import Fox
 from enemies import Eagle
 
-import levels.maps                                                                                                                                                                  
+import levels.maps
+
 
 from random import randrange as rr
 
@@ -23,7 +25,7 @@ pygame.init()
 pygame.mixer.init()
 
 WIDTH = 1600
-HEIGHT = 800
+HEIGHT = 900
 
 pygame.display.set_caption("platformer")  # sets the window title
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # creates game screen
@@ -32,19 +34,16 @@ clock = pygame.time.Clock() #set up clock
 gameover = False #variable to run our game loop
 
 #map1: 1 is grass
-Map = levels.maps.room_zero
+Map = levels.maps.room_two
 
 tramp = Trampoline(100, 100)
 
 character = Possum()
 
-plats1 = [
-
-]
+plats1 = []
 
 for i in range(len(Map)):
 	plats1.append([])
-
 
 
 platNum = 0
@@ -63,15 +62,23 @@ whatPlat = 0
 for i in range (len(Map)):
 		for j in range(len(Map[i])):
 			if Map[i][j]!=0:
-				plats1[i].append(Floor(i*50,j*50))
+				if Map[i][j] == 5:
+					plats1[i].append(spawn(i*50,j*50))
+					character.getSpawn(j*50,i*50)
+				#if Map[i][j] == 4:
+					#plats1[i].append(goal(i*50, j*50))
+				#if Map[i][j] == 3:
+					#plats1[i.append(Trampoline(i*50, i*50))]
+				else:
+					plats1[i].append(Floor(i*50,j*50))
 				#map(lambda x:Floor(i*50,j*50) if x== 0 else x,plats)
 			else:
 				plats1[i].append(0)
 			if Map[i][j] != 0:
 				platNum +=1
 
-character.getPlatty(platNum)
 
+character.getPlatty(platNum)
 
 #eagle = Eagle(100,100)
 dog = Dog(100, 100)
@@ -123,7 +130,7 @@ while not gameover:
 
 
 	
-	screen.fill((0,0,0))
+	screen.fill((0,19,23))
 	#dog.draw()
 	#horse.draw()
 	#fox.draw()
@@ -139,7 +146,8 @@ while not gameover:
 		for j in range(len(Map[i])):
 			if Map[i][j]!=0:
 				plats1[i][j].updatePos(j*50+character.offset.x, i*50+character.offset.y)
-				plats1[i][j].draw()
+				if plats1[i][j].hitbox.left < 1650 and plats1[i][j].hitbox.right > -50 and plats1[i][j].hitbox.bottom > -50 and plats1[i][j].hitbox.top < 950:
+					plats1[i][j].draw()
 
 	#for i in range (16):
 	#	for j in range(42):

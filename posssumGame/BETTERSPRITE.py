@@ -6,7 +6,7 @@ from pygame.rect import Rect
 pygame.init() 
 pygame.mixer.init()
 
-screen = pygame.display.set_mode((1600, 800))  # creates game screen
+screen = pygame.display.set_mode((1600, 900))  # creates game screen
 
 
 
@@ -36,7 +36,7 @@ class Possum:
 		self.whatdoing = "stand"
 		self.direction = 1
 		self.charge = 0
-		self.maxleap = 240
+		self.maxleap = 480
 		self.fastfall = 0
 
 		#collison
@@ -66,19 +66,19 @@ class Possum:
 
 	def getKeyPressed(self):
 		keys = pygame.key.get_pressed() #gets pressed keys
-		walkspeed = 3.5 * self.size*1.5 #so i dont have to change speed values if the playersize is changed
-		sprintspeed = 12 * self.size*1.5 #same here
-	#------------------------------------------------------------------------------------------------
+		walkspeed = 4.5 * self.size*1.5 #so i dont have to change speed values if the playersize is changed
+		sprintspeed = 15 * self.size*1.5 #same here
+	#------------------------------------------------------------------------------------------------ CROUCH AND SUCH
 		if keys[pygame.K_DOWN] or keys[pygame.K_s]:
 			self.pressed[3] = True 
-			if self.isOnGround == True:
+			if self.isOnGround:
 				if keys[pygame.K_a] == False and keys[pygame.K_d] == False: #if not pressing movement keys basically
 					self.whatdoing = "squat"
-				self.charge += self.maxleap/95 #charges up super jump or "leap"
+				self.charge += self.maxleap/190 #charges up super jump or "leap"
 				if self.charge >= self.maxleap: # if the charge is greater than the max
 					self.charge = self.maxleap #sets charge to max
 				self.fastfall = 0 # if on ground, sets fastfall to zero to prevent clipping
-			if self.isOnGround == False: 
+			if self.isOnGround: 
 				if self.vel.y > 0:
 					self.fastfall += 0.1 #allows players to fall faster while holding down mid air
 		else:
@@ -86,10 +86,10 @@ class Possum:
 			self.fastfall = 0 #fast fall is zero if not holding down
 			if self.isOnGround == True:
 				if self.charge > 0:
-					self.charge -= self.maxleap/80 #decreases charge when not holding, allows for some holding
+					self.charge -= self.maxleap/160 #decreases charge when not holding, allows for some holding
 				if self.charge <= 1:
 					self.charge = 1 #sets charge to base value if below minimum
-	#------------------------------------------------------------------------------------------------
+	#------------------------------------------------------------------------------------------------ LEFT
 		if keys[pygame.K_a]:
 			self.pressed[0]=True
 			if keys[pygame.K_DOWN] == False and keys[pygame.K_s] == False and self.isOnGround == True:
@@ -115,11 +115,11 @@ class Possum:
 						self.vel.x += 0.3
 					else:
 						self.vel.x= -walkspeed
-
-			self.direction = 1
+			if self.isOnGround or self.vel.x < 0:
+				self.direction = 1
 		else:
 			self.pressed[0]=False
-	#------------------------------------------------------------------------------------------------
+	#------------------------------------------------------------------------------------------------ RIGHT
 		if keys[pygame.K_d]:
 			self.pressed[1]=True
 			if keys[pygame.K_DOWN] == False and keys[pygame.K_s] == False and self.isOnGround == True:
@@ -145,19 +145,19 @@ class Possum:
 						self.vel.x -= 0.3
 					else:
 						self.vel.x= walkspeed
-
-			self.direction = 0
+			if self.isOnGround or self.vel.x > 0:
+				self.direction = 0
 
 		else:
 			self.pressed[1]=False
-	#------------------------------------------------------------------------------------------------
+	#------------------------------------------------------------------------------------------------ 
 		if keys[pygame.K_a] == False and keys[pygame.K_d] == False:
 			if self.isOnGround == False:
 				if abs(self.vel.x) != 0:
 					self.vel.x*=0.98
 				if abs(self.vel.x)<=0.2:
 					self.vel.x = 0
-	#------------------------------------------------------------------------------------------------
+	#------------------------------------------------------------------------------------------------ JUMP
 		if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:# or keys[pygame.K_x]:
 			self.pressed[2]=True
 			if self.whatdoing != "leap":
@@ -166,7 +166,7 @@ class Possum:
 				self.hitbox.bottom+=1
 		else:
 			self.pressed[2]=False
-	#------------------------------------------------------------------------------------------------
+	#------------------------------------------------------------------------------------------------ SPRINT
 		if keys[pygame.K_LSHIFT]:
 			self.pressed[4] = True
 		else:
@@ -177,6 +177,9 @@ class Possum:
 		for i in range(num):
 			self.platList.append(0)
 			self.wallList.append(False)
+
+	def getSpawn(self,x,y):
+		self.offset.update(x-500,-y+500)
 
 
 	def collision(self, objPos:Rect, groundType:str,num:int):
@@ -216,6 +219,8 @@ class Possum:
 		groundNum = 0
 		wallNum = 0
 		bonknum = 0
+		if self.vel.x == 0:
+			self.vel.x = 0.001
 		if type == 0:
 			for i in range(len(self.platList)):
 				if self.platList[i] == 1:
@@ -241,24 +246,30 @@ class Possum:
 					self.isOnWall = False
 					
 			if self.isBonked:
-				if self.hitbox.top<self.groundPos.bottom and self.isOnWall!= True:
-					self.offset.y -= self.groundPos.bottom - self.hitbox.top
+				if self.hitbox.top<self.groundPos.bottom and self.vel.y < 0 and self.isOnWall!=True:
 					self.vel.y = 0
-					print("BONK")
+					self.offset.y -= self.groundPos.bottom - self.hitbox.top
 
 			if self.isOnWall:
 
 				if self.hitbox.right>self.wallPos.left and self.vel.x>0:
 
 					self.offset.x += int(self.hitbox.right - self.wallPos.left)
-					self.vel.x = 0
+					self.vel.x -= 3
+					if self.pressed[2] == True and self.pressed[4] == True:
+						self.vel.x = -21
+						self.vel.y = -12
+						self.direction = 1
 
-				if self.hitbox.left<self.wallPos.right and self.vel.x<0:
+				elif self.hitbox.left<self.wallPos.right and self.vel.x<0:
 
 					self.offset.x -= int(self.wallPos.right - self.hitbox.left)
-					self.vel.x = 0
+					self.vel.x += 3
+					if self.pressed[2] == True and self.pressed[4] == True:
+						self.vel.x = 21
+						self.vel.y = -12
+						self.direction = 0
 				
-				self.vel.y = -4
 
 			if self.isOnGround:
 				if self.hitbox.bottom>self.groundPos.top and self.isOnWall != True:
@@ -278,19 +289,27 @@ class Possum:
 			if self.isOnGround == False:
 				if self.whatdoing != "leap":
 					self.whatdoing = "jump"
-				self.vel.x*=0.99
-				self.vel.y += 0.4
+				if self.whatdoing == "leap" and self.vel.y<0:
+					self.vel.y += 0.2
+				else:
+					self.vel.y += 0.4
 
 		if type == 1:
 			if self.vel.y >self.maxvel:
 				self.vel.y = self.maxvel
+			if self.vel.y <-self.maxvel:
+				self.vel.y = -self.maxvel
 			self.offset.y -= self.vel.y + self.fastfall
 			self.offset.x -= self.vel.x
 			print(self.vel.y)
+
 			
 		
 		if type == 3:
-			self.hitbox.update(self.pos.x+5, self.pos.y+15, self.frameWidth-5, self.frameHeight-15)
+			if self.direction == 1:
+				self.hitbox.update(self.pos.x+5, self.pos.y+15, self.frameWidth-45, self.frameHeight-15)
+			if self.direction == 0:
+				self.hitbox.update(self.pos.x+45, self.pos.y+15, self.frameWidth-45, self.frameHeight-15)
 
 		
 
@@ -354,13 +373,18 @@ class Possum:
 				self.RowNum = 1
 			else:
 				self.RowNum = 0
-			if self.isOnGround == True and self.isOnWall != True:
-				if self.charge>=self.maxleap*0.5:
-					self.vel.y=-((22*self.size)+(self.charge/10))
+			if self.isOnGround and self.isOnWall != True:
+				#if self.charge>=self.maxleap*0.66:
+				#	self.vel.y=-((22*self.size)+(self.charge/20))
+				#	self.whatdoing = "leap"
+				if self.charge >= self.maxleap*0.44:
+					self.vel.y=-(22*self.size)
+					if self.direction == 0:
+						self.vel.x = self.charge/15
+					if self.direction == 1:
+						self.vel.x = -(self.charge/15)
 				else:
 					self.vel.y=-(22*self.size)
-				if self.charge>= self.maxleap*0.5:
-					self.whatdoing = "leap"
 				self.charge = 1
 			if self.whatdoing == "leap":
 				self.vel.x*=0.6
@@ -406,8 +430,7 @@ class Possum:
 
 	def draw(self):
 		pygame.draw.rect(screen, (50,170,0), self.hitbox)
-		#( self.hitbox.left, self.hitbox.top-15)
-		#( self.hitbox.left, self.hitbox.top-30)
+
 		if self.whatdoing == "jump" or self.whatdoing == "leap":
 			screen.blit(self.possum, self.pos, (self.frameWidth*3, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		elif self.whatdoing == "stand":
@@ -426,10 +449,12 @@ class Possum:
 		#	screen.blit(self.possum, self.pos, (2*self.frameWidth, self.RowNum*self.frameHeight, self.frameWidth, self.frameHeight))
 		else:
 			self.whatdoing = "walk"
-		if self.charge<self.maxleap*0.5:
-			pygame.draw.line(screen, (255,50,0),(800-self.charge*1.2,780),(800+self.charge*1.2,780),20)
-		else:
-			pygame.draw.line(screen, (50,255,0),(800-self.charge*1.2,780),(800+self.charge*1.2,780),20)
+		if self.charge<self.maxleap*0.44:
+			pygame.draw.line(screen, (255,50,0),(800-self.charge*1.2,880),(800+self.charge*1.2,880),20)
+		elif self.charge>=self.maxleap*0.66:
+			pygame.draw.line(screen, (255,200,0),(800-self.charge*1.2,880),(800+self.charge*1.2,880),20)
+		elif self.charge>=self.maxleap*0.44:
+			pygame.draw.line(screen, (50,255,0),(800-self.charge*1.2,880),(800+self.charge*1.2,880),20)
 	def damagefun(self):
 		return self.damage
 
