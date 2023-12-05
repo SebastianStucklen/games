@@ -79,9 +79,9 @@ class Dog(enemy):
 		self.pos = Vector2(0,0)
         #self.dog2 = pygame.transform.smoothscale(self.dog,(200,200))
 	
-	#def draw(self):
-	#	if self.alive == True:
-	#		screen.blit(self.dog, self.hitbox,(self.pos.x + self.offset.x, self.pos.y + self.offset.y))
+	def draw(self):
+		if self.alive == True:
+			screen.blit(self.dog, self.hitbox,(self.pos.x + self.offset.x, self.pos.y + self.offset.y))
 
 	def movement(self):
 		if self.alive == True:
