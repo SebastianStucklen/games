@@ -1,15 +1,20 @@
 import pygame
 from pygame.math import Vector2
 from pygame.rect import Rect
+#from random import randrange as rr
 from BETTERSPRITE import Possum
 
+#Platforms
 from platforms import Platform
 from platforms import Trampoline
-from platforms import Mblock
 from platforms import Ice_block
 from platforms import Floor
-from platforms import spawn
+from platforms import spike
+from platforms import goal
+from platforms import water
 
+
+#Enemies
 from enemies import Dog
 from enemies import Horse
 from enemies import Fox
@@ -18,7 +23,6 @@ from enemies import Eagle
 import levels.maps
 
 
-from random import randrange as rr
 
 
 pygame.init() 
@@ -34,7 +38,7 @@ clock = pygame.time.Clock() #set up clock
 gameover = False #variable to run our game loop
 
 #map1: 1 is grass
-Map = levels.maps.room_two
+Map = levels.maps.room_zero
 
 tramp = Trampoline(100, 100)
 
@@ -49,7 +53,7 @@ for i in range(len(Map)):
 platNum = 0
 whatPlat = 0
 #floor = Floor(100,800)
-
+width = 0
 
 #plats.append(mblock(rr(0,700), rr(100,600)))
 #plats.append(platform(rr(0,700), rr(100,600)))
@@ -63,19 +67,26 @@ for i in range (len(Map)):
 		for j in range(len(Map[i])):
 			if Map[i][j]!=0:
 				if Map[i][j] == 5:
-					plats1[i].append(spawn(i*50,j*50))
-					character.getSpawn(j*50,i*50)
+					plats1[i].append(spike(j*50,i*50))
 				#if Map[i][j] == 4:
 					#plats1[i].append(goal(i*50, j*50))
-				#if Map[i][j] == 3:
-					#plats1[i.append(Trampoline(i*50, i*50))]
+				elif Map[i][j] == 3:
+					plats1[i].append(Trampoline(j*50, i*50))
+				#if Map[i][j] == 2:
+					#plats1[i].append(Ice_block(i*50, j*50))
+				#if Map[i][j] == 6:
+					#plats1[i].append(water(i*50, j*50))
 				else:
-					plats1[i].append(Floor(i*50,j*50))
+					plats1[i].append(Floor(j*50,i*50))
 				#map(lambda x:Floor(i*50,j*50) if x== 0 else x,plats)
 			else:
 				plats1[i].append(0)
 			if Map[i][j] != 0:
 				platNum +=1
+			width = len(Map[i])
+
+character.getSpawn(width,len(Map))
+	
 
 
 character.getPlatty(platNum)
@@ -84,7 +95,9 @@ character.getPlatty(platNum)
 dog = Dog(100, 100)
 horse = Horse(0,0) 
 fox = Fox(0, 0)
+eagle = Eagle(0,0)
 
+eagle.getPlatty(platNum)
 dog.getPlatty(platNum)
 horse.getPlatty(platNum)
 fox.getPlatty(platNum)
@@ -104,6 +117,9 @@ while not gameover:
 			gameover = True
 	
 	keys = pygame.key.get_pressed()
+
+	if character.health <= 0.1:
+		gameover = True
 
 	character.update(3) #update hitbox
 	for i in range (len(Map)):

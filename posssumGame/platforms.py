@@ -9,8 +9,8 @@ screen = pygame.display.set_mode((1600, 800))  # creates game screen
 
 _floorsprite = pygame.image.load('resources/grass.jpg')
 _floorsprite = pygame.transform.smoothscale(_floorsprite,(50,50))
-_spawnsprite = pygame.image.load('resources/placeholder.png')
-_spawnsprite = pygame.transform.smoothscale(_spawnsprite,(50,50))
+_spikesprite = pygame.image.load('resources/placeholder.png')
+_spikesprite = pygame.transform.smoothscale(_spikesprite,(50,50))
 
 global plat
 plat = 0
@@ -36,12 +36,12 @@ class Platform:
     def updatePos(self,x,y):
         self.hitbox.update(x,y,self.hitbox.width,self.hitbox.height)
 
-class spawn(Platform):
-    image = _spawnsprite
+class spike(Platform):
+    image = _spikesprite
 
     def __init__(self, xpos, ypos):
         self.hitbox = Rect(xpos, ypos, 50, 50)
-        self.type = "normal"
+        self.type = "spike"
     
     def draw(self):
         
@@ -59,18 +59,6 @@ class Floor(Platform):
         
         #pygame.draw.rect(screen, (180,190,180), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
         screen.blit(self.image, self.hitbox)
-
-
-class Mblock(Platform):
-    def __init__(self, xpos, ypos):
-        self.hitbox = Rect(xpos, ypos, 100, 30)
-        self.startx = xpos
-        self.starty = ypos
-        self.direction = 1
-        self.type = "Moveblock"
-    def draw(self):
-        pygame.draw.rect(screen, (255, 0, 0), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
-
 
 class Trampoline(Platform):
     def __init__(self, xpos, ypos):
@@ -105,8 +93,15 @@ class goal(Platform):
     def __init__(self, xpos, ypos):
         super().__init__(xpos, ypos)
         self.hitbox = Rect(xpos, ypos, 50, 50)
-        self.type = 'goal'
+        self.type = 'Goal'
     
     def draw(self):
         pygame.draw.rect(screen, (255,0,0), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
 
+class water(Platform):
+    def __init__(self, xpos, ypos):
+        self.type = 'Water'
+        super().__init__(xpos, ypos)
+
+    def draw(self):
+        pygame.draw.rect(screen, (0,255,255), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
