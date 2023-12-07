@@ -8,9 +8,9 @@ from pygame.rect import Rect
 screen = pygame.display.set_mode((1600, 800))  # creates game screen
 
 _floorsprite = pygame.image.load('resources/grass.jpg')
-_floorsprite = pygame.transform.smoothscale(_floorsprite,(50,50))
+_floorsprite = pygame.transform.smoothscale(_floorsprite,(54,54))
 _spikesprite = pygame.image.load('resources/placeholder.png')
-_spikesprite = pygame.transform.smoothscale(_spikesprite,(50,50))
+_spikesprite = pygame.transform.smoothscale(_spikesprite,(50,80))
 
 global plat
 plat = 0
@@ -40,7 +40,7 @@ class spike(Platform):
     image = _spikesprite
 
     def __init__(self, xpos, ypos):
-        self.hitbox = Rect(xpos, ypos, 50, 50)
+        self.hitbox = Rect(xpos, ypos, 50, 80)
         self.type = "spike"
     
     def draw(self):
@@ -51,7 +51,7 @@ class Floor(Platform):
     image = _floorsprite
 
     def __init__(self, xpos, ypos):
-        self.hitbox = Rect(xpos, ypos, 50, 50)
+        self.hitbox = Rect(xpos, ypos, 54, 54)
         self.type = "normal"
         self.floors = []
     

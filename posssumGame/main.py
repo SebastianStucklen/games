@@ -67,7 +67,7 @@ for i in range (len(Map)):
 		for j in range(len(Map[i])):
 			if Map[i][j]!=0:
 				if Map[i][j] == 5:
-					plats1[i].append(spike(j*50,i*50))
+					plats1[i].append(spike(j*50,(i*50)-30))
 				#if Map[i][j] == 4:
 					#plats1[i].append(goal(i*50, j*50))
 				elif Map[i][j] == 3:
@@ -104,7 +104,6 @@ fox.getPlatty(platNum)
 
 #PLACE HOLDER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 
 while not gameover:
@@ -161,7 +160,10 @@ while not gameover:
 	for i in range (len(Map)):
 		for j in range(len(Map[i])):
 			if Map[i][j]!=0:
-				plats1[i][j].updatePos(j*50+character.offset.x, i*50+character.offset.y)
+				if Map[i][j] == 5:
+					plats1[i][j].updatePos(j*50+character.offset.x, (i*50+character.offset.y)-30)
+				else:
+					plats1[i][j].updatePos(j*50+character.offset.x, i*50+character.offset.y)
 				if plats1[i][j].hitbox.left < 1650 and plats1[i][j].hitbox.right > -50 and plats1[i][j].hitbox.bottom > -50 and plats1[i][j].hitbox.top < 950:
 					plats1[i][j].draw()
 
