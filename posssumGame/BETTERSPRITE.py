@@ -3,6 +3,8 @@
 import pygame
 from pygame.math import Vector2
 from pygame.rect import Rect
+
+from platforms import Trampoline
 pygame.init() 
 pygame.mixer.init()
 
@@ -52,6 +54,7 @@ class Possum:
 		self.wallPos = Rect(0,0,0,0)
 		self.platList = []
 		self.wallList = []
+		self.wallJumps = 0
 
 		#anim
 		self.hurtTick = 0
@@ -76,25 +79,30 @@ class Possum:
 
 	def getKeyPressed(self):
 		keys = pygame.key.get_pressed() #gets pressed keys
-		self.walkspeed = 4.5 * self.size*1.5 #so i dont have to change speed values if the playersize is changed
+		self.walkspeed = 3 * self.size*1.5 #so i dont have to change speed values if the playersize is changed
 		self.sprintspeed = 12 * self.size*1.5 #same here
 	#------------------------------------------------------------------------------------------------ CROUCH AND SUCH
 		if keys[pygame.K_DOWN] or keys[pygame.K_s]:
 			self.pressed[3] = True 
+
 			if self.isOnGround:
 				if keys[pygame.K_a] == False and keys[pygame.K_d] == False: #if not pressing movement keys basically
 					self.whatdoing = "squat"
+
 				self.charge += self.maxleap/190 #charges up super jump or "leap"
+
 				if self.charge >= self.maxleap: # if the charge is greater than the max
 					self.charge = self.maxleap #sets charge to max
+
 				self.fastfall = 0 # if on ground, sets fastfall to zero to prevent clipping
-			if self.isOnGround: 
+
+			if not self.isOnGround: 
 				if self.vel.y > 0:
 					self.fastfall += 0.1 #allows players to fall faster while holding down mid air
 		else:
 			self.pressed[3]=False
 			self.fastfall = 0 #fast fall is zero if not holding down
-			if self.isOnGround == True:
+			if self.isOnGround:
 				if self.charge > 0:
 					self.charge -= self.maxleap/160 #decreases charge when not holding, allows for some holding
 				if self.charge <= 1:
@@ -104,7 +112,7 @@ class Possum:
 			self.pressed[0]=True
 			if keys[pygame.K_DOWN] == False and keys[pygame.K_s] == False and self.isOnGround == True:
 				self.whatdoing = "walk"
-			if self.isOnWall != True:
+			if not self.isOnWall:
 				if keys[pygame.K_DOWN] or keys[pygame.K_s]:
 					if self.isOnGround:
 						if abs(self.vel.x) > 3.5 * self.size*1.5:
@@ -119,12 +127,12 @@ class Possum:
 					if self.vel.x > -self.sprintspeed:
 						self.vel.x-=0.3
 					else:
-						self.vel.x -= 0.1
+						self.vel.x -= 0.01
 				else:
 					if self.vel.x > -self.walkspeed:
 						self.vel.x -= 0.8
 					else:
-						self.vel.x -= 0.3
+						self.vel.x -= 0.01
 			if self.vel.x < 0:
 				self.direction = 1
 		else:
@@ -134,7 +142,7 @@ class Possum:
 			self.pressed[1]=True
 			if keys[pygame.K_DOWN] == False and keys[pygame.K_s] == False and self.isOnGround == True:
 				self.whatdoing = "walk"
-			if self.isOnWall != True:
+			if not self.isOnWall:
 				if keys[pygame.K_DOWN] or keys[pygame.K_s]:
 					if self.isOnGround:
 						if abs(self.vel.x) > 3.5 * self.size*1.5:
@@ -149,12 +157,12 @@ class Possum:
 					if self.vel.x < self.sprintspeed:
 						self.vel.x+=0.3
 					else:
-						self.vel.x += 0.1
+						self.vel.x += 0.01
 				else:
 					if self.vel.x < self.walkspeed:
 						self.vel.x += 0.8
 					else:
-						self.vel.x += 0.3
+						self.vel.x += 0.01
 			if self.vel.x > 0:
 				self.direction = 0
 
@@ -190,49 +198,63 @@ class Possum:
 
 	def getSpawn(self,x,y):
 		self.offset.update(x+800-self.frameWidth*2,y-1350+self.frameHeight*2)
+	
 
 	def collision(self, objPos:Rect, groundType:str,num:int):
 
 		if self.hitbox.colliderect(objPos) == True:
 			self.groundPos = objPos
 			self.groundType = groundType
+
 			if self.hitbox.top-7 <= self.groundPos.bottom+self.vel.y and self.hitbox.bottom-7 > self.groundPos.bottom:
 				self.platList[num] = 2
+
 			elif self.hitbox.bottom+7 >= self.groundPos.top-self.vel.y and self.hitbox.top-14 <= self.groundPos.top:
 				if self.hitbox.centerx+self.hitbox.width*0.3> self.groundPos.left and self.hitbox.centerx-self.hitbox.width*0.3 < self.groundPos.right:
 					self.platList[num] = 1
+
 			if self.hitbox.right+7 >= objPos.left-self.vel.x and self.hitbox.centery >= objPos.top and self.hitbox.centery-10 <= objPos.bottom:
 				self.wallPos.update(objPos)
 				self.wallList[num] = True
+
 			if self.hitbox.left-7 <= objPos.right+self.vel.x and self.hitbox.centery >= objPos.top and self.hitbox.centery-10 <= objPos.bottom:
 				self.wallPos.update(objPos)
 				self.wallList[num] = True 
-			
+		
 		else:
-			self.groundType = "air"
 			self.platList[num] = 0
 			self.wallList[num] = False
+	def gouds(self):
 
 		if self.groundType == "normal":
 			pass
+
 		if self.groundType == "spike":
-			self.vel.y -= 6
+			self.vel.y -= 1
 			self.whatdoing = "hurt"
-			if self.hurtTick >= 45:
+			if self.hurtTick >= 45 or self.hurtTick == 0:
 				self.health -= 10
 				self.hurtTick = 1
 		#	pass
 		if self.groundType == "trampoline":
-			if self.vel.y > 0:
+			if self.vel.y >= 0:
 				if self.pressed[2]:
-					self.vel.y = -self.vel.y*1.2
+					self.vel.y = -abs(self.vel.y)*1.2
 				else:
 					self.vel.y = -self.vel.y*0.8
-				self.vel.y-=0.1
-			
-		#elif self.groundType == "Moveblock":
-		#	pass
-		#elif self.groundType == "breakblock":
+				self.vel.y-=1
+
+
+		if self.groundType == "Ice":
+			self.vel.x += 1
+
+		if self.groundType == "Water":
+			if self.vel.y<0:
+					self.vel.y += 0.1
+			self.isOnGround = False
+			self.isOnWall = False
+
+		#if self.groundType == "breakblock":
 		#	pass
 
 	
@@ -243,13 +265,15 @@ class Possum:
 		if self.vel.x == 0:
 			self.vel.x = 0.001
 		if type == 0:
-			#print(self.health)
 			if self.hurtTick >= 1:
 				self.hurtTick += 1
+
 			if self.hurtTick > 120:
 				self.hurtTick = 0
+
 			if self.hurtTick == 0 and self.health < 100:
 				self.health += 0.334
+
 			for i in range(len(self.platList)):
 				if self.platList[i] == 1:
 					groundNum += 1
@@ -285,14 +309,15 @@ class Possum:
 						self.offset.x += int(self.hitbox.right - self.wallPos.left)
 					else:
 						self.vel.y = -12
+
 					if self.vel.x >= self.walkspeed*0.1:
 						self.vel.x -= self.sprintspeed*1.1
 
-					if self.pressed[2] == True:
-						if self.pressed[1]:
-							self.vel.x = -6
-							self.vel.y = -13
-							self.direction = 1
+					if self.pressed[2] and self.pressed[1] and self.wallJumps < 3:
+						self.vel.x = -6
+						self.vel.y = -13
+						self.direction = 1
+						self.wallJumps += 1
 
 
 				elif self.hitbox.left<self.wallPos.right and self.vel.x<0:
@@ -303,11 +328,11 @@ class Possum:
 					if self.vel.x <= -self.walkspeed*0.1:
 						self.vel.x += self.sprintspeed*1.1
 
-					if self.pressed[2] == True:
-						if self.pressed[0]:
-							self.vel.x = 6
-							self.vel.y = -13
-							self.direction = 0
+					if self.pressed[2] and self.pressed[0] and self.wallJumps < 3:
+						self.vel.x = 6
+						self.vel.y = -13
+						self.direction = 0
+						self.wallJumps += 1
 				
 
 			if self.isOnGround:
@@ -317,31 +342,35 @@ class Possum:
 
 				if self.vel.y >= 14:
 					self.whatdoing = "land"
-				elif self.whatdoing != "land":
+
+				elif self.whatdoing != "land" and self.whatdoing != "hurt":
 					nothingDoing = 0
 					for i in range(len(self.pressed)):
 						nothingDoing += 1
 					if nothingDoing == len(self.pressed):
 						self.whatdoing = "stand"
+
 				if self.groundType != "spike" and self.groundType != "trampoline":
 					self.vel.y = 0
 				self.fastfall = 0
-			
-			if not self.isOnGround:
+				self.wallJumps = 0
+				
+
+			else:
+
 				self.groundType = "air"
+
 				if self.whatdoing != "leap" and self.whatdoing != "hurt":
 					self.whatdoing = "jump"
-				if self.whatdoing == "leap" and self.vel.y<0:
-					self.vel.y += 0.2
-				else:
-					self.vel.y += 0.4
+
+				self.vel.y += 0.4
+
 
 		if type == 1:
 			if self.vel.y >self.maxvel:
 				self.vel.y = self.maxvel
 			self.offset.y -= self.vel.y + self.fastfall
 			self.offset.x -= self.vel.x
-
 			
 		
 		if type == 3:
@@ -420,25 +449,20 @@ class Possum:
 			else:
 				self.RowNum = 0
 			if self.isOnGround and self.isOnWall != True:
-				#if self.charge>=self.maxleap*0.66:
-				#	self.vel.y=-((22*self.size)+(self.charge/20))
-				#	self.whatdoing = "leap"
 				if self.charge >= self.maxleap*0.44:
-					self.vel.y=-(22*self.size)
+					if self.groundType != "trampoline":
+						self.vel.y=-(22*self.size)
 					if self.direction == 0:
 						self.vel.x = self.charge/15
 					if self.direction == 1:
 						self.vel.x = -(self.charge/15)
-				else:
+				elif self.groundType != "trampoline":
 					self.vel.y=-(22*self.size)
 				self.charge = 1
 			if self.whatdoing == "leap":
 				self.vel.x*=0.6
 
 		if self.whatdoing == "squat":
-			#self.hitbox.top = int(self.hitbox.bottom+40)
-			#self.hitbox.height = int(self.frameHeight-40)
-			#self.hitbox.inflate_ip(1,0.1)
 			self.hitbox.update(self.pos.x+5, self.pos.y+30,self.hitbox.width,self.hitbox.height-15)
 
 			self.vel.x *= 0.7

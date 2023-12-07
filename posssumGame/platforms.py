@@ -1,3 +1,4 @@
+from cmath import rect
 import pygame
 from random import randrange as rr
 import math
@@ -62,7 +63,7 @@ class Floor(Platform):
 
 class Trampoline(Platform):
     def __init__(self, xpos, ypos):
-        self.hitbox = Rect(xpos, ypos, 100, 30)
+        self.hitbox = Rect(xpos, ypos, 100, 50)
         self.type = "trampoline"
         self.velChange = Vector2 (0,10)
         
@@ -101,7 +102,18 @@ class goal(Platform):
 class water(Platform):
     def __init__(self, xpos, ypos):
         self.type = 'Water'
+        self.hitbox = Rect(xpos,ypos, 50, 50)
         super().__init__(xpos, ypos)
 
     def draw(self):
         pygame.draw.rect(screen, (0,255,255), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))
+
+
+class Breakblock(Platform):
+    def __init__(self, xpos, ypos):
+        self.hitbox = Rect(xpos, ypos, 50,50)
+        super().__init__(xpos, ypos)
+        self.type = "break"
+    
+    def draw(self):
+        pygame.draw.rect(screen, (255,0,255), (self.hitbox.left, self.hitbox.top, self.hitbox.width, self.hitbox.height))

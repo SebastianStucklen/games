@@ -72,10 +72,12 @@ for i in range (len(Map)):
 					#plats1[i].append(goal(i*50, j*50))
 				elif Map[i][j] == 3:
 					plats1[i].append(Trampoline(j*50, i*50))
-				#if Map[i][j] == 2:
-					#plats1[i].append(Ice_block(i*50, j*50))
-				#if Map[i][j] == 6:
-					#plats1[i].append(water(i*50, j*50))
+				elif Map[i][j] == 2:
+					plats1[i].append(Ice_block(j*50, i*50))
+				elif Map[i][j] == 6:
+					plats1[i].append(water(j*50, i*50))
+				#elif Map[i][j] == 7:
+					#plats1[i].append(Breakblock(j*50, i*50))
 				else:
 					plats1[i].append(Floor(j*50,i*50))
 				#map(lambda x:Floor(i*50,j*50) if x== 0 else x,plats)
@@ -128,6 +130,7 @@ while not gameover:
 				dog.collision(plats1[i][j].hitbox, plats1[i][j].type,whatPlat)
 				whatPlat+=1
 	whatPlat = 0
+	character.gouds()
 
 	character.update(0) #ground, gravity, etc
 	dog.update(0,1000000)
@@ -138,7 +141,7 @@ while not gameover:
  
 	character.update(3) 
 	character.actions() #actions
-	whatPlat = 0
+
 
 	character.update(1) # add vel to pos
 	dog.update(1,1000000)
@@ -152,8 +155,8 @@ while not gameover:
 	#Trampoline.draw()
 
 	
-	#for i in range(len(plats)):
-	#	plats[i].returnType()
+	#for i in range(len(plats1)):
+	#	plats1[i].returnType()
 	
 
 	#pygame.draw.line(screen, (180,190,180),(0,ground.y),(800,ground.y),1)
