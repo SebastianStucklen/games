@@ -4,7 +4,7 @@ from pygame.math import Vector2
 from random import randrange as rr
 from pygame.rect import Rect
 WIDTH = 1600
-HEIGHT = 800
+HEIGHT = 900
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # creates game screen
 
 

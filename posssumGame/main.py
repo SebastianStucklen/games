@@ -1,8 +1,8 @@
 import pygame
 from pygame.math import Vector2
 from pygame.rect import Rect
-#from random import randrange as rr
 from BETTERSPRITE import Possum
+#from random import randrange as rr
 
 #Platforms
 from platforms import Platform
@@ -12,6 +12,7 @@ from platforms import Floor
 from platforms import spike
 from platforms import goal
 from platforms import water
+from platforms import Sidetramp
 
 
 #Enemies
@@ -38,7 +39,7 @@ clock = pygame.time.Clock() #set up clock
 gameover = False #variable to run our game loop
 
 #map1: 1 is grass
-Map = levels.maps.room_zero
+Map = levels.maps.room_four
 
 tramp = Trampoline(100, 100)
 
@@ -67,15 +68,17 @@ for i in range (len(Map)):
 		for j in range(len(Map[i])):
 			if Map[i][j]!=0:
 				if Map[i][j] == 5:
-					plats1[i].append(spike(j*50,(i*50)-30))
-				#if Map[i][j] == 4:
-					#plats1[i].append(goal(i*50, j*50))
+					plats1[i].append(spike(j*50,(i*50)-10))
+				elif Map[i][j] == 4:
+					plats1[i].append(goal(i*50, j*50))
 				elif Map[i][j] == 3:
 					plats1[i].append(Trampoline(j*50, i*50))
 				elif Map[i][j] == 2:
 					plats1[i].append(Ice_block(j*50, i*50))
 				elif Map[i][j] == 6:
 					plats1[i].append(water(j*50, i*50))
+				elif Map[i][j] == 8:
+					plats1[i].append(Sidetramp(j*50, i*50))
 				#elif Map[i][j] == 7:
 					#plats1[i].append(Breakblock(j*50, i*50))
 				else:
@@ -123,6 +126,8 @@ while not gameover:
 		gameover = True
 
 	character.update(3) #update hitbox
+	dog.update(0,1000000)
+
 	for i in range (len(Map)):
 		for j in range(len(Map[i])):
 			if Map[i][j]!=0:
@@ -131,9 +136,8 @@ while not gameover:
 				whatPlat+=1
 	whatPlat = 0
 	character.gouds()
-
+	
 	character.update(0) #ground, gravity, etc
-	dog.update(0,1000000)
 	
 	character.getKeyPressed() #get keystrokes
 	dog.movement()
@@ -141,6 +145,7 @@ while not gameover:
  
 	character.update(3) 
 	character.actions() #actions
+
 
 
 	character.update(1) # add vel to pos
@@ -153,7 +158,7 @@ while not gameover:
 	#horse.draw()
 	#fox.draw()
 	#Trampoline.draw()
-
+	
 	
 	#for i in range(len(plats1)):
 	#	plats1[i].returnType()
@@ -164,7 +169,7 @@ while not gameover:
 		for j in range(len(Map[i])):
 			if Map[i][j]!=0:
 				if Map[i][j] == 5:
-					plats1[i][j].updatePos(j*50+character.offset.x, (i*50+character.offset.y)-30)
+					plats1[i][j].updatePos(j*50+character.offset.x, (i*50+character.offset.y)-10)
 				else:
 					plats1[i][j].updatePos(j*50+character.offset.x, i*50+character.offset.y)
 				if plats1[i][j].hitbox.left < 1650 and plats1[i][j].hitbox.right > -50 and plats1[i][j].hitbox.bottom > -50 and plats1[i][j].hitbox.top < 950:
