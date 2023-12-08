@@ -11,12 +11,13 @@ screen = pygame.display.set_mode((1600, 900))  # creates game screen
 
 
 
+
 class Possum:
 
 	def __init__(self):
 		self.size = 0.46
 		self.damage = 100
-		self.health = 100
+		self.health = 120
 
 		self.possum1 = pygame.image.load('resources/possum9.png')
 		self.possum = pygame.transform.smoothscale_by(self.possum1,self.size)
@@ -196,7 +197,7 @@ class Possum:
 			self.wallList.append(False)
 
 	def getSpawn(self,x,y):
-		self.offset.update(x+800-self.frameWidth*2,y-1350+self.frameHeight*2)
+		self.offset.update(x+800-self.frameWidth*2,y-1365)
 	
 
 	def collision(self, objPos:Rect, groundType:str,num:int):
@@ -224,48 +225,49 @@ class Possum:
 			self.platList[num] = 0
 			self.wallList[num] = False
 	def gouds(self):
+		if self.isOnGround or self.isOnWall or self.isBonked:
+			if self.groundType == "normal":
+				pass
 
-		if self.groundType == "normal":
-			pass
+			if self.groundType == "spike":
+				self.vel.y -= 10
+				self.whatdoing = "hurt"
+				if self.hurtTick >= 45 or self.hurtTick == 0:
+					self.health -= 50
+					self.hurtTick = 1
+					
+			#	pass
+			if self.groundType == "trampoline":
+				#if self.vel.y >= 0:
+				#	if self.pressed[2]:
+				#		self.vel.y = -abs(self.vel.y)*1.2
+				#	else:
+				#		self.vel.y = -self.vel.y*0.8
+				self.vel.y= -28
+				self.vel.x *= 0.3
 
-		if self.groundType == "spike":
-			self.vel.y -= 10
-			self.whatdoing = "hurt"
-			if self.hurtTick >= 45 or self.hurtTick == 0:
-				self.health -= 10
-				self.hurtTick = 1
-		#	pass
-		if self.groundType == "trampoline":
-			#if self.vel.y >= 0:
-			#	if self.pressed[2]:
-			#		self.vel.y = -abs(self.vel.y)*1.2
-			#	else:
-			#		self.vel.y = -self.vel.y*0.8
-			self.vel.y= -28
-			self.vel.x *= 0.3
-		
-		if self.groundType == "sideT":
-			if self.direction == 0:
-				self.vel.x = +8
-				self.vel.y = -13
-				self.direction = 1
-				#self.wallJumps -= 1
-			elif self.direction == 1:
-				self.vel.x = -8
-				self.vel.y = -13
-				self.direction = 0
-				#self.wallJumps += 1
+			if self.groundType == "sideT":
+				if self.direction == 0:
+					self.vel.x = +8
+					self.vel.y = -13
+					self.direction = 1
+					#self.wallJumps -= 1
+				elif self.direction == 1:
+					self.vel.x = -8
+					self.vel.y = -13
+					self.direction = 0
+					#self.wallJumps += 1
 
 
-		if self.groundType == "Ice":
-			self.vel.x *= 1.06
+			if self.groundType == "Ice":
+				self.vel.x *= 1.06
 
-		if self.groundType == "Water":
-			if self.vel.y<0:
-					self.vel.y += 0.1
-			self.isOnGround = False
-			self.isBonked = False
-			self.isOnWall = False
+			if self.groundType == "Water":
+				if self.vel.y<0:
+						self.vel.y += 0.1
+				self.isOnGround = False
+				self.isBonked = False
+				self.isOnWall = False
 
 		#if self.groundType == "Goal":
 			# pass
@@ -377,7 +379,7 @@ class Possum:
 			if self.isOnGround and self.isOnWall:
 				self.vel.y = -5
 
-			else:
+			elif self.isBonked == False and self.isOnGround == False and self.isOnWall == False:
 				self.groundType = "air"
 
 		if type == 1:
