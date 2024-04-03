@@ -13,12 +13,7 @@ class TextDisplay:
 		self.x = x
 		self.y = y
 
-	def update(self, screen, text, size, color: tuple = (255,255,255)):
-		font = pygame.font.Font(None, size)
-		text = font.render(str(text), 1, color)
+	def update(self, screen, text,size):
+		font = pygame.font.Font(None, 200)
+		text = font.render(str(text), 1, (255, 255, 255))
 		screen.blit(text, (self.x, self.y))
-
-def interact():
-	keys = pygame.key.get_pressed()
-	if keys[pygame.K_SPACE]:
-		return True
