@@ -20,25 +20,25 @@ class FishingHole:
 			return True
 
 
-	def quicktime(self,screen,delta,len) -> bool:
+	def quicktime(self,screen,delta,length) -> bool:
 		fish = []
 		player = []
 		timer = 0
 		screen.fill((0,0,0))
-		for i in range(len):
+		for i in range(length):
 			prompt = str(random.randint(0,9))
 			if i > 0:
 				while prompt == fish[i-1]:
 					prompt = str(random.randint(0,9))
 			fish.append(prompt)
-			self.text.append(TextDisplay(fish[i], SCREEN_RECT.x + i * ((SCREEN_RECT.width - 100) / len), SCREEN_RECT.centery, 200))
-			print(SCREEN_RECT.x + i * ((SCREEN_RECT.width - 100) / len))
+			self.text.append(TextDisplay(fish[i], SCREEN_RECT.x + i * ((SCREEN_RECT.width - 100) / length), SCREEN_RECT.centery, 200))
+			print(SCREEN_RECT.x + i * ((SCREEN_RECT.width - 100) / length))
 			self.text[i].update(screen,fish[i],200)
 			print(fish, self.text[i].x)
-		for j in range(len):
+		for j in range(length):
 			IPUT = 'void'
 			while True:
-				maxtime = len*0.7
+				maxtime = length*0.7
 
 				for event in pygame.event.get():
 					pass
