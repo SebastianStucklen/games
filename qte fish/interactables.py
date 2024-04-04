@@ -10,7 +10,7 @@ from globals import SCREEN_RECT, TextDisplay
 class FishingHole:
 	def __init__(self):
 		self.rect = Rect(50,400,700,400)
-		self.text = []
+		self.text: list[TextDisplay] = []
 	
 	def draw(self,screen):
 		draw.rect(screen, (0, 162, 232), self.rect)
@@ -20,7 +20,7 @@ class FishingHole:
 			return True
 
 
-	def quicktime(self,screen,delta,len):
+	def quicktime(self,screen,delta,len) -> bool:
 		fish = []
 		player = []
 		timer = 0
@@ -31,9 +31,11 @@ class FishingHole:
 				while prompt == fish[i-1]:
 					prompt = str(random.randint(0,9))
 			fish.append(prompt)
-			self.text.append(TextDisplay(fish[i], ((SCREEN_RECT.x + i * ((SCREEN_RECT.width - 100) / len))), SCREEN_RECT.centery, 200))
+			self.text.append(TextDisplay(fish[i], SCREEN_RECT.x + i * ((SCREEN_RECT.width - 100) / len), SCREEN_RECT.centery, 200))
+			print(SCREEN_RECT.x + i * ((SCREEN_RECT.width - 100) / len))
 			self.text[i].update(screen,fish[i],200)
-		for i in range(len):
+			print(fish, self.text[i].x)
+		for j in range(len):
 			IPUT = 'void'
 			while True:
 				maxtime = len*0.7
@@ -50,11 +52,12 @@ class FishingHole:
 
 				pygame.display.flip()
 
-				if IPUT == fish[i]:
-					self.text[i].update(screen,fish[i],200,(100,100,100))
+				if IPUT == fish[j]:
+					self.text[j].update(screen,fish[j],200,(100,100,100))
 					break
 				if timer >= maxtime:
-					print("FAIL")
+					# print("FAIL")
+					pass
 
 			player.append(IPUT)
 
@@ -62,6 +65,7 @@ class FishingHole:
 			return True
 		else:
 			print(fish, player)
+			return False
 				
 		
 	def inputs(self):

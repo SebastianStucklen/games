@@ -2,7 +2,7 @@ import pygame
 from pygame import Vector2
 from globals import FPS, SCREEN_SIZE, interact, TextDisplay
 from player import Player
-from minigame import FishingHole
+from interactables import FishingHole
 from fishgen import fishgen
 pygame.init()
 

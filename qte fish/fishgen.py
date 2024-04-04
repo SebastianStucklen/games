@@ -7,11 +7,14 @@ import random
 # Legendary (1.00% Base Drop Rate)
 
 #chance upgrade = 18
+
+fishId = ""
+
 def fishgen(chance = 0):
 
     roll = random.random()
     roll *= 100
-
+    #[Rarity, Game rounds, fish id, money]
     if roll < 1:
         return ["Legendary", 12]
     
